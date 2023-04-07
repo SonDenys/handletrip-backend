@@ -15,7 +15,7 @@ router.get("user/trip/:id", isAuthenticated, async (req, res) => {
       select: "account",
     });
 
-    console.log(trip);
+    console.log(trip, "hello");
     res.status(200).json({ trip: trip });
   } catch (error) {
     res.status(400).json({ message: error.message });
