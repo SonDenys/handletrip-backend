@@ -4,19 +4,42 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 
 const Trip = require("../models/Trip");
 
-// ------------- ROUTE GET TRIP -----------------
+// ------------- ROUTE GET ALL TRIP -----------------
 
-router.get("user/trip/:id", isAuthenticated, async (req, res) => {
+router.get("/user/trip/", isAuthenticated, async (req, res) => {
   try {
-    const userId = req.params.id;
-    console.log(userId);
+    const userId = req.user.id;
+
+    const tripCount = await Trip.countDocuments({ owner: userId });
+    console.log("userId ===>", userId);
+    console.log("Nombre de voyages pour cet utilisateur :", tripCount);
+
     const trip = await Trip.find({ owner: userId }).populate({
       path: "owner",
       select: "account",
     });
 
-    console.log(trip, "helldqdzo");
     res.status(200).json({ trip: trip });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// ------------- ROUTE GET TRIP -----------------A FAIRE
+
+router.get("/user/trip/:id", isAuthenticated, async (req, res) => {
+  try {
+    if (req.params.id) {
+      const userId = req.params.id;
+      const trip = await Trip.findById(userId).populate({
+        path: "owner",
+        select: "account",
+      });
+
+      res.json(trip);
+    } else {
+      res.status(400).json({ message: "Trip not founded" });
+    }
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -26,8 +49,12 @@ router.get("user/trip/:id", isAuthenticated, async (req, res) => {
 
 router.post("/user/trip/create_trip", isAuthenticated, async (req, res) => {
   try {
-    const newTrip = new Trip({
-      owner: req.fields.userId,
+    const userId = req.user.id;
+
+    console.log("userId ===>", userId);
+
+    let newTrip = new Trip({
+      owner: userId,
       tripId: req.fields.tripId,
       localisation: req.fields.localisation,
       event: req.fields.event,
@@ -36,13 +63,13 @@ router.post("/user/trip/create_trip", isAuthenticated, async (req, res) => {
 
     await newTrip.save();
 
-    res.json({
-      owner: req.fields.userId,
-      tripId: req.fields.tripId,
-      localisation: req.fields.localisation,
-      event: req.fields.event,
-      date: req.fields.date,
-    });
+    // Récupérer les informations du voyageur propriétaire
+    const populatedTrip = await Trip.findById(newTrip._id).populate(
+      "owner",
+      "account"
+    );
+
+    res.json(populatedTrip);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -53,7 +80,10 @@ router.post("/user/trip/create_trip", isAuthenticated, async (req, res) => {
 router.post("user/trip/update_trip", async (req, res) => {
   try {
     if ((req.fields.id, req.fields.localisation)) {
-      const trip = await Trip.findById(req.fields.id);
+      const trip = await Trip.findById(req.fields.id).populate({
+        path: "owner",
+        select: "account",
+      });
 
       trip.localisation = req.fields.localisation;
       trip.event = req.fields.event;
