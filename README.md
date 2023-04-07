@@ -1,14 +1,13 @@
-# Authentification-Express
+# HandleTrip
 
-Authentification with Node and its package Express
+Application in order to save and organize your vacations. The app is in progress 
 
 ### Backend Part
 
-This is a small authentification functionality. The project is useful for the starting of new projects. You can use it as you want !! 😉
-<br>
-Developed functionalities :
+Developed functionalities until now:
 
 - Authentification SignIn & SignOut with cookies
+- Create and put the informations of your trip via a single form
 
 Back-end :
 ![](https://img.shields.io/badge/Code-JavaScript-informational?style=flat&logo=JavaScript&logoColor=white&color=EDAE49)
